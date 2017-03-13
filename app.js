@@ -1,19 +1,29 @@
 const express = require('express');
+const bodyParser = require('body-parser');
+const urlencodedParser = bodyParser.urlencoded({ extended: false });
 const app = express();
 
 const nunjucks = require('nunjucks');
 
-const routes = require('./routes');
+const wikiRouter = require('./routes/wiki.js');
 const morgan = require('morgan');
 
 const models = require('./models');
 
 //setting up middleware
 app.use(morgan('dev'));
-//app.use(bodyParser.json());
+app.use(bodyParser.json());
+app.use(urlencodedParser);
 
 // Set up the database and make sure the server
 // is listening to it 
+app.use('/wiki/', wikiRouter);
+
+// nunjucks
+app.set('view engine', 'html');
+app.engine('html', nunjucks.render);
+nunjucks.configure('views', {noCache: true});
+
 
 models.User.sync({})
 .then(function () {
